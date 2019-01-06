@@ -1,0 +1,6 @@
+
+alias pe="pipenv"
+
+# venv() {
+
+# }
