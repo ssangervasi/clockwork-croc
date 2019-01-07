@@ -1,6 +1,8 @@
 
 alias pe="pipenv"
 
-# venv() {
+run() {
+  pe run app
+}
 
-# }
+PS1="🐊 $PS1"

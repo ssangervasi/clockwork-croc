@@ -1,96 +1,18 @@
-import logging
-import os.path as path
+from disco import client
 
-import requests
-from furl import furl
-from requests_oauthlib import OAuth2Session
+from clockwork_croc.util import get_logger, memoize
 
-import yaml
-
-##
-# Logging
-# 
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    format='🤖 {message}',
-    style='{',
-    # level=logging.INFO,
-    level=logging.DEBUG,
-)
-
-##
-# main
-def main():
-    logger.info('Starting main.')
-    secrets = load_secrets()
-    logger.info('Secrets all good.')
-    croc = Croc()
-    croc.authorize(secrets['discord'])
-    croc.get_me()
-    croc.get_my_guild()
-    croc.get_my_general_channel()
-    croc.say_hello()
-    logger.info('Done.')
-
-
-##
-# Secrets
-
-def load_secrets():
-    app_dir_path = path.dirname(__file__)
-    secrets_path = path.abspath(path.join(app_dir_path, '../.secrets.yaml'))
-    if not path.exists(secrets_path):
-        raise Exception(f'Cannot locate secrets! Expected "{secrets_path}" to exist.')
-
-    with open(secrets_path, 'r') as secrets_file:
-        parsed_secrets = yaml.load(secrets_file)
-
-    assert_required_secrets_are_included(parsed_secrets)
-    return parsed_secrets
-
-def assert_required_secrets_are_included(secrets_dict):
-    # Dirty fn-level import until this is broken out of single file.
-    from hamcrest import assert_that, has_entries, instance_of
-
-    assert_that(
-        secrets_dict,
-        has_entries({
-            'discord': has_entries({
-                'client': has_entries({
-                    'id': instance_of(str),
-                    'secret': instance_of(str)
-                }),
-                'bot': has_entries({
-                    'username': instance_of(str),
-                    'token': instance_of(str)
-                })
-            })
-        })
-    )
-
-##
-# Discord bot
-
-from functools import wraps
-
-def memoize(f):
-    not_set = object()
-    memo = not_set
-
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        nonlocal memo
-        if memo is not_set:
-            memo = f(*args, **kwargs)
-        return memo
-
-    return wrapper
+logger = get_logger('croc', level='DEBUG')
 
 class Croc:
     api_root = furl('https://discordapp.com/api/v6')
 
     def authorize(self, discord_secrets):
         assert discord_secrets is not None
+
+        client.ClientConfig(
+            token=discord_secrets['bot']['token']
+        )
 
         bot_username = discord_secrets['bot']['username']
         bot_token = discord_secrets['bot']['token']
@@ -205,31 +127,3 @@ class Croc:
         r = self.session.post(url, json=payload)
         r.raise_for_status()
 
-
-if  __name__ == '__main__':
-    main()
-
-'''
-# This information is obtained upon registration of a new GitHub
-client_id = "<your client key>"
-client_secret = "<your client secret>"
-authorization_base_url = 'https://github.com/login/oauth/authorize'
-token_url = 'https://github.com/login/oauth/access_token'
-
-@app.route("/login")
-def login():
-    github = OAuth2Session(client_id)
-    authorization_url, state = github.authorization_url(authorization_base_url)
-
-    # State is used to prevent CSRF, keep this for later.
-    session['oauth_state'] = state
-    return redirect(authorization_url)
-
-@app.route("/callback")
-def callback():
-    github = OAuth2Session(client_id, state=session['oauth_state'])
-    token = github.fetch_token(token_url, client_secret=client_secret,
-                               authorization_response=request.url)
-
-    return jsonify(github.get('https://api.github.com/user').json())
-'''
