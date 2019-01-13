@@ -3,6 +3,7 @@ from os import path
 import yaml
 from hamcrest import assert_that, has_entries, instance_of
 
+
 ##
 # Secrets
 
@@ -17,6 +18,7 @@ def load_secrets():
 
     assert_required_secrets_are_included(parsed_secrets)
     return parsed_secrets
+
 
 def assert_required_secrets_are_included(secrets_dict):
     assert_that(
