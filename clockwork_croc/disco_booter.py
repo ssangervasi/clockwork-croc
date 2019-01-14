@@ -1,59 +1,51 @@
-import argparse
-
 from disco.client       import Client, ClientConfig
 from disco.bot          import Bot, BotConfig
-from disco.util.logging import setup_logging
 
-def disco_cli_args():
-    parser = argparse.ArgumentParser()
-    return parser.parse_args()
+from clockwork_croc.util import get_logger, chain
+
+logger = get_logger(__name__, level='DEBUG')
+
 
 class DiscoBooter:
-    def __init__(self, args):
-        self.args = args
+    
+    def __init__(self, secrets, plugins=[]):
+        self.secrets = secrets
+        self.plugins = plugins
 
-    def main(self):
+    @chain
+    def boot(self):
         self.build_client_config()
-        
-        if self.auto_shard(): return
-        
         self.build_client()
-        self.build_bot()        
-        return self
+        self.build_bot()
+        self.run_forever()
 
+    @chain
     def build_client_config(self):
-        logger.INFO('TODO: Add specific configs instead of using default.')
+        logger.info('TODO: Add specific configs instead of using default.')
 
-        config = ClientConfig()
-
-        args = self.args
-        for arg_key, config_key in six.iteritems(CONFIG_OVERRIDE_MAPPING):
-            if getattr(args, arg_key) is not None:
-                setattr(config, config_key, getattr(args, arg_key))
+        token = self.secrets['bot']['token']
+        config = ClientConfig({'token': token})
 
         self.config = config
-        return self
 
+    @chain
     def build_client(self):
         self.client = Client(self.config)
 
+    @chain
     def build_bot(self):
-        bot = None
-        if args.run_bot or hasattr(config, 'bot'):
-            bot_config = BotConfig(config.bot) if hasattr(config, 'bot') else BotConfig()
-            if not hasattr(bot_config, 'plugins'):
-                bot_config.plugins = args.plugin
-            else:
-                bot_config.plugins += args.plugin
+        self.build_bot_config()
+        self.bot = Bot(self.client, self.bot_config)
 
-            bot = Bot(client, bot_config)
 
-        self.bot = bot
-        return self
+    @chain
+    def build_bot_config(self):
+        plugin_mods = [plugin.__module__ for plugin in self.plugins]
+        self.bot_config = BotConfig({'plugins': plugin_mods})
 
-    def run(self):
-        runner = (self.bot or self.client)
-        runner.run_forever()
+    def run_forever(self):
+        # self.bot.run_forever()
+        self.client.run_forever()
 
     def auto_shard(self):
         from disco.gateway.sharder import AutoSharder

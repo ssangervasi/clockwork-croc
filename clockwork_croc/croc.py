@@ -2,7 +2,7 @@ from disco.bot import Plugin, Config
 
 from clockwork_croc.util import get_logger, memoize
 
-logger = get_logger('croc', level='DEBUG')
+logger = get_logger(__name__, level='DEBUG')
 
 # from clockwork_croc.secrets import secrets
 

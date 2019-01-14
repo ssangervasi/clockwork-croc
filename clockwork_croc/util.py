@@ -34,3 +34,14 @@ def memoize(f):
         return memo
 
     return wrapper
+
+def chain(instance_method):
+    @wraps(instance_method)
+    def wrapper(*args, **kwargs):
+        # assert hasattr(instance_method, '__self__'), (
+        #     f'Non-instance method "{instance_method.__name__}" cannot be chained.'
+        # )
+        instance_method(*args, **kwargs)
+        return args[0]
+
+    return wrapper
