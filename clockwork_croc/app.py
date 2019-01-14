@@ -1,9 +1,14 @@
+from gevent import monkey
+
+monkey.patch_all()
+
 from clockwork_croc.util import get_logger
 from clockwork_croc.secrets import load_secrets
 from clockwork_croc.croc import CrocPlugin
+
 from clockwork_croc.disco_booter import DiscoBooter
 
-logger = get_logger(__name__, level='INFO')
+logger = get_logger(__name__, level='DEBUG')
 
 
 # def main():

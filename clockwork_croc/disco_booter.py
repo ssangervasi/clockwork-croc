@@ -36,16 +36,18 @@ class DiscoBooter:
     def build_bot(self):
         self.build_bot_config()
         self.bot = Bot(self.client, self.bot_config)
-
+        map(self.bot.add_plugin, [
+            plugin(self.bot, None)
+            for plugin in self.plugins
+        ])
 
     @chain
     def build_bot_config(self):
-        plugin_mods = [plugin.__module__ for plugin in self.plugins]
-        self.bot_config = BotConfig({'plugins': plugin_mods})
+        self.bot_config = BotConfig()
 
     def run_forever(self):
-        # self.bot.run_forever()
-        self.client.run_forever()
+        self.bot.run_forever()
+        # self.client.run_forever()
 
     def auto_shard(self):
         from disco.gateway.sharder import AutoSharder
