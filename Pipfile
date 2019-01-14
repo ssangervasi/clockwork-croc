@@ -11,8 +11,8 @@ flake8 = "*"
 ##
 # Discord API connections
 # New disco-based
-# gevent = "~= 1.3"
-disco-py = {git = "https://github.com/b1naryth1ef/disco.git", editable = true, ref = "v0.0.13-rc.2"}
+gevent = "~= 1.3"
+disco-py = {version = "~=0.0.13rc2", extras = ["performance"], pre = true}
 requests = {version = "*", extras = ["security"]}
 ujson = "*"
 
@@ -28,3 +28,7 @@ python_version = "3.7"
 
 [scripts]
 app = "python -m clockwork_croc.app"
+
+
+[pipenv]
+allow_prereleases = true
