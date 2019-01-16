@@ -1,8 +1,9 @@
 
 alias pe="pipenv"
+export PIPENV_DEV=1
 
 run() {
-  pe run app
+  pe run python -m clockwork_croc.app
 }
 
 disco() {
