@@ -1,5 +1,9 @@
+import re
+from itertools import cycle, islice, tee, repeat
+from collections import namedtuple
 from textwrap import dedent as dd
 
+import gevent
 from disco.bot import Plugin, Config
 from disco.types.message import (
     MessageEmbed,
@@ -39,26 +43,98 @@ class CrocPlugin(Plugin):
     def on_message_create(self, event):
         message = event.message
         logger.info(f'On MessageCreate message: {message}')
-        should_reply = self.croc.should_reply(message)
-        logger.info(f'Message {message.id} | Should_reply: {should_reply}')
-        if not should_reply:
-            return
 
         self.client.gw.events.emit('SnapSnap')
-        message.reply('Snap snap!', embed=self.croc.fancy_embed())
-
+        self.croc.handle_message(message)
 
 class Croc:
     my_channel_name = 'clockwork-croc'
+    my_voice_channel_name = 'snap-snap'
 
     def __init__(self, client):
         self.client = client
+        self.voice_client = None
 
-    def should_reply(self, message):
-        return all([
+
+    def handle_message(self, message):
+        logger.info(f'Message {message.id}')
+
+        handlers = [
+            self.handle_ignore_self,
+            self.handle_greeting,
+            self.handle_fancy,
+            self.handle_speak,
+            self.handle_shut_up,
+            self.handle_make_noise,
+        ]
+
+        result = message
+        for handler in handlers:
+            if result is None:
+                break
+
+            result = handler(result)
+
+    def handle_ignore_self(self, message):
+        should_ignore = not all([
             message.channel.id == self.my_channel.id,
             message.author.id != self.me.id
         ])
+        return None if should_ignore else message
+    
+    def handle_greeting(self, message):
+        if re.match(r'yo|hello|hi', message.content, re.I):
+            message.reply('Snap snap!')
+            return None
+        return message
+
+    def handle_fancy(self, message):
+        if re.match(r'fancy', message.content, re.I):
+            message.reply(embed=self.fancy_embed())
+            return None
+        return message
+
+    def handle_speak(self, message):
+        if re.match(r'speak|talk|join', message.content, re.I):
+            self.voice_client = self.my_voice_channel.connect()
+            logger.info(f'Joined with voice client {self.voice_client}')
+            return None
+        return message
+
+    def handle_shut_up(self, message):
+        if re.match(r'shut up|quiet|go away', message.content, re.I):
+            self.voice_client.disconnect()
+            return None
+        return message
+
+    def handle_make_noise(self, message):
+        if not re.match(r'make noise', message.content, re.I):
+            return message
+
+        gevent.spawn(self.send_noise)
+
+    def send_noise(self):
+        logger.info('send_noise')
+        if not self.voice_client:
+            logger.info('send_noise no client')
+            return
+
+        self.voice_client.set_speaking(voice=True)
+        # frames = repeat(bytearray(islice(cycle(range(100, 200)), 1_000)), 100)
+        frames = repeat(bytearray(islice(cycle(range(100, 200)), 1_000)), 100)
+
+        i = 0
+        while self.voice_client:
+            try:
+                frame = next(frames)
+            except StopIteration:
+                break
+            self.voice_client.send_frame(frame)
+            self.voice_client.increment_timestamp(48)
+            gevent.sleep(1.0/48)
+            i += 1
+
+        logger.info(f'send_noise loop done after {i} frames')
 
     @property
     @memoize
@@ -82,13 +158,23 @@ class Croc:
     @property
     @memoize
     def my_channel(self):
-        self.summarize_channels(self.id_to_channel.values())
+        # self.summarize_channels(self.id_to_channel.values())
         my_channels = [
             channel
             for channel in self.id_to_channel.values()
             if channel.name == self.my_channel_name
         ]
         return my_channels[0] if len(my_channels) > 0 else None
+
+    @property
+    @memoize
+    def my_voice_channel(self):
+        my_voice_channels = [
+            channel
+            for channel in self.id_to_channel.values()
+            if channel.name == self.my_voice_channel_name
+        ]
+        return my_voice_channels[0] if len(my_voice_channels) > 0 else None
 
     def fancy_embed(self):
         return MessageEmbed(

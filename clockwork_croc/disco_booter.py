@@ -26,8 +26,8 @@ class DiscoBooter:
             .build_client_config()
             .build_client()
             .build_bot()
-            .build_voice_client()
-            .build_crocky_talky()
+            # .build_voice_client()
+            # .build_crocky_talky()
             .run_forever()
         )
 
@@ -68,9 +68,9 @@ class DiscoBooter:
         self.crocky_talky = CrockyTalky(self.voice_client, voice_channel_id)
 
     def run_forever(self):
-        bot_thread = gevent.spawn(self.bot.run_forever)
-        crocky_talky_thread = gevent.spawn(self.crocky_talky.run_forever)
-        gevent.joinall([bot_thread, crocky_talky_thread])
+        bot_thread = gevent.spawn(self.bot.run_forever).join()
+        # crocky_talky_thread = gevent.spawn(self.crocky_talky.run_forever)
+        # gevent.joinall([bot_thread, crocky_talky_thread])
         # gevent.joinall([crocky_talky_thread])
 
 
