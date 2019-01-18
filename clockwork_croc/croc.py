@@ -15,13 +15,6 @@ from clockwork_croc.util import get_logger, memoize
 
 logger = get_logger('croc', level='DEBUG')
 
-# from clockwork_croc.secrets import secrets
-
-
-# class CrocPluginConfig(Config):
-#     token = secrets['bot']['token']
-# @Plugin.with_config(CrocPluginConfig)
-
 
 class CrocPlugin(Plugin):
     guild_id_list = []
@@ -51,6 +44,7 @@ class CrocPlugin(Plugin):
         if not should_reply:
             return
 
+        self.client.gw.events.emit('SnapSnap')
         message.reply('Snap snap!', embed=self.croc.fancy_embed())
 
 
@@ -74,13 +68,6 @@ class Croc:
     @property
     def id_to_guild(self):
         return self.client.api.users_me_guilds_list()
-        # guilds = [
-        #     self.client.api.guilds_get(guild_id)
-        #     for guild_id in self.guild_id_list
-        # ]
-        # logger.debug(f'Guild dict {guilds[0].to_dict()}')
-        # self.summarize_guilds(guilds)
-        # return guilds
 
     @property
     def my_guild(self):
@@ -146,51 +133,6 @@ class Croc:
                 )
             ]
         )
-        '''
-        MessageEmbed,
-        MessageEmbedAuthor,
-        MessageEmbedField,
-        MessageEmbedFooter,
-        MessageEmbedImage,
-        MessageEmbedThumbnail,
-        MessageEmbedVideo,
-        '''
-        """
-        return MessageEmbed(
-            title='Heck yes.',
-            description=dd('''
-                <blink>Does outdated HTML Work?</blink>
-                <marquee>~ - ~ - ~ - ~ - 😎 ~ - ~ - ~ - ~ - </marquee>
-            '''),
-            url='https://caniuse.com/#search=marquee',
-            # timestamp
-            color=69_69_69,
-            footer=MessageEmbedFooter(
-                text=dd('''
-                    <strong>I've got to left feet</stong>
-                    <div style="background: pink">
-                        And I'm all out of bublegum...
-                    </div>
-                ''')
-            ),
-            image=MessageEmbedImage(url='https://cdn.discordapp.com/app-icons/530605657699909643/10496f03af9dbbd6e3669b50f7fc5cb4.png?size=512'),
-            thumbnail=MessageEmbedThumbnail(url='https://cdn.discordapp.com/app-icons/530605657699909643/10496f03af9dbbd6e3669b50f7fc5cb4.png?size=64'),
-            video=MessageEmbedVideo(url='https://youtu.be/sn8KYD1Vco0'),
-            author=MessageEmbedAuthor(name='Crock Daddy'),
-            fields=[
-                MessageEmbedField(
-                    name='How we do',
-                    value=dd('''
-                        <ol>
-                            <li>Like this</li>
-                            <li>Like that</li>
-                            <li>Like this</li>
-                        </ol>
-                    ''')
-                )
-            ]
-        )
-        """
 
     def summarize_channels(self, channels):
         def summarize(channel):

@@ -1,5 +1,3 @@
-import gevent
-
 from clockwork_croc.disco_booter import DiscoBooter
 from clockwork_croc.util import get_logger
 from clockwork_croc.secrets import load_secrets
@@ -8,18 +6,6 @@ from clockwork_croc.croc import CrocPlugin
 
 logger = get_logger(__name__, level='DEBUG')
 
-
-# def main():
-#     logger.info('Starting main.')
-#     secrets = load_secrets()
-#     logger.info('Secrets all good.')
-#     croc = Croc()
-#     croc.authorize(secrets['discord'])
-#     croc.go_online()
-#     croc.get_my_guild()
-#     croc.get_my_channel()
-#     croc.say_hello()
-#     logger.info('Done.')
 
 def main():
     logger.info('Starting main.')
@@ -34,19 +20,7 @@ def main():
         ]
     )
 
-
-    gevent.spawn(booter.boot).join()
-    
-
-
-    # croc = Croc()
-    # croc.authorize(secrets['discord'])
-    # croc.go_online()
-    # croc.get_my_guild()
-    # croc.get_my_channel()
-    # croc.say_hello()
-    # logger.info('Done.')
-
+    booter.boot()    
 
 if __name__ == '__main__':
     main()
