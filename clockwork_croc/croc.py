@@ -1,5 +1,5 @@
 import re
-from itertools import cycle, islice, tee, repeat
+from itertools import cycle, islice, tee, repeat, chain
 from collections import namedtuple
 from textwrap import dedent as dd
 
@@ -121,7 +121,7 @@ class Croc:
 
         self.voice_client.set_speaking(voice=True)
         # frames = repeat(bytearray(islice(cycle(range(100, 200)), 1_000)), 100)
-        frames = repeat(bytearray(islice(cycle(range(100, 200)), 1_000)), 100)
+        frames = repeat(bytearray(islice(cycle(chain(range(0, 200), range(200, 0))), 500)), 1_000)
 
         i = 0
         while self.voice_client:
@@ -130,8 +130,8 @@ class Croc:
             except StopIteration:
                 break
             self.voice_client.send_frame(frame)
-            self.voice_client.increment_timestamp(48)
-            gevent.sleep(1.0/48)
+            self.voice_client.increment_timestamp(480)
+            gevent.sleep(1.0/480)
             i += 1
 
         logger.info(f'send_noise loop done after {i} frames')
