@@ -12,9 +12,16 @@ holster = "*"
 websocket-client = "*"
 
 [packages.disco-py]
-version = "~=0.0.13rc2"
+# This fork has my patches.
+git = "git@github.com/ssangervasi/disco.git"
+ref = "ssangervasi/v0.0.13-rc.2"
+editable = true
 extras = ["performance", "voice"]
-pre = true
+
+# The version without patches.
+# Prerelease version was necessary to use Python 2.7
+# version = "~=0.0.13rc2"
+# pre = true
 
 [packages]
 ##

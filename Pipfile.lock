@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "d201e9af587d0a45999dcfb9466ea7827e24c2b4866b015da99f3e352f88b0bd"
+            "sha256": "841d2c753662025cf42c5e4de1c9fb9ad6b473146f46eb94c3396e603d9e10d2"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -99,12 +99,13 @@
             "version": "==2.4.2"
         },
         "disco-py": {
+            "editable": true,
             "extras": [
                 "performance",
                 "voice"
             ],
-            "pre": true,
-            "version": "~=0.0.13rc2"
+            "git": "git@github.com/ssangervasi/disco.git",
+            "ref": "ssangervasi/v0.0.13-rc.2"
         },
         "gevent": {
             "hashes": [
@@ -233,6 +234,14 @@
         }
     },
     "develop": {
+        "appnope": {
+            "hashes": [
+                "sha256:5b26757dc6f79a3b7dc9fab95359328d5747fcb2409d331ea66d0272b90ab2a0",
+                "sha256:8b995ffe925347a2138d7ac0fe77155e4311a0ea6d6da4f5128fe4b3cbe5ed71"
+            ],
+            "markers": "sys_platform == 'darwin'",
+            "version": "==0.1.0"
+        },
         "backcall": {
             "hashes": [
                 "sha256:38ecd85be2c1e78f77fd91700c76e14667dc21e2713b63876c0eb901196e01e4",
