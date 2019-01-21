@@ -7,6 +7,9 @@ verify_ssl = true
 ipython = "*"
 ipdb = "*"
 flake8 = "*"
+ujson = "*"
+holster = "*"
+websocket-client = "*"
 
 [packages.disco-py]
 version = "~=0.0.13rc2"
@@ -18,16 +21,12 @@ pre = true
 # Discord API connections
 # New disco-based
 gevent = "~= 1.3"
-requests = {version = "*", extras = ["security"]}
+requests = {version = "*",extras = ["security"]}
 ujson = "*"
-
 ##
 # Actual my stuff
 pyhamcrest = "*"
 pyyaml = "*"
-
-
-
 # Other
 
 [requires]
