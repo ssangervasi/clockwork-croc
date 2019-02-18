@@ -4,6 +4,7 @@ from collections import namedtuple
 from textwrap import dedent as dd
 
 import gevent
+from pymonad.Maybe import Maybe, Just, Nothing
 from disco.bot import Plugin, Config
 from disco.types.message import (
     MessageEmbed,
@@ -58,60 +59,53 @@ class Croc:
 
     def handle_message(self, message):
         logger.info(f'Message {message.id}')
-
-        handlers = [
-            self.handle_ignore_self,
-            self.handle_greeting,
-            self.handle_fancy,
-            self.handle_speak,
-            self.handle_shut_up,
-            self.handle_make_noise,
-        ]
-
-        result = message
-        for handler in handlers:
-            if result is None:
-                break
-
-            result = handler(result)
+        ( Just(message) 
+            >> self.handle_ignore_self
+            >> self.handle_greeting
+            >> self.handle_fancy
+            >> self.handle_speak
+            >> self.handle_shut_up
+            >> self.handle_make_noise
+        )
 
     def handle_ignore_self(self, message):
         should_ignore = not all([
             message.channel.id == self.my_channel.id,
             message.author.id != self.me.id
         ])
-        return None if should_ignore else message
-    
+        return Nothing if should_ignore else Just(message)
+
     def handle_greeting(self, message):
         if re.match(r'yo|hello|hi', message.content, re.I):
             message.reply('Snap snap!')
-            return None
-        return message
+            return Nothing
+        return Just(message)
 
     def handle_fancy(self, message):
         if re.match(r'fancy', message.content, re.I):
             message.reply(embed=self.fancy_embed())
-            return None
-        return message
+            return Nothing
+        return Just(message)
 
     def handle_speak(self, message):
         if re.match(r'speak|talk|join', message.content, re.I):
             self.voice_client = self.my_voice_channel.connect()
             logger.info(f'Joined with voice client {self.voice_client}')
-            return None
-        return message
+            return Nothing
+        return Just(message)
 
     def handle_shut_up(self, message):
         if re.match(r'shut up|quiet|go away', message.content, re.I):
             self.voice_client.disconnect()
-            return None
-        return message
+            return Nothing
+        return Just(message)
 
     def handle_make_noise(self, message):
         if not re.match(r'make noise', message.content, re.I):
-            return message
+            return Just(message)
 
         gevent.spawn(self.send_noise)
+        return Nothing
 
     def send_noise(self):
         logger.info('send_noise')
@@ -180,8 +174,8 @@ class Croc:
         return MessageEmbed(
             title='Heck yes.',
             description=dd('''
-                h1. Ho dang it's markdown 
-                > ~ - ~ - ~ - ~ - 😎 ~ - ~ - ~ - ~ - 
+                h1. Ho dang it's markdown
+                > ~ - ~ - ~ - ~ - 😎 ~ - ~ - ~ - ~ -
             '''),
             url='https://caniuse.com/#search=marquee',
             # timestamp

@@ -1,6 +1,6 @@
 
-alias pe="pipenv"
-export PIPENV_DEV=1
+alias pe='pipenv'
+alias ped='PIPENV_DEV=1 pe'
 
 run() {
   pe run python -m clockwork_croc.app
