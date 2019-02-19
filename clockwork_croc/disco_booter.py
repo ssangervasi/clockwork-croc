@@ -26,10 +26,11 @@ class DiscoBooter:
             .build_client_config()
             .build_client()
             .build_bot()
-            # .build_voice_client()
-            # .build_crocky_talky()
             .run_forever()
         )
+
+    def run_forever(self):
+        return gevent.spawn(self.bot.run_forever).join()
 
     @chain
     def build_client_config(self):
@@ -61,46 +62,3 @@ class DiscoBooter:
     def build_voice_client(self):
         server_id = self.secrets['server']['id']
         self.voice_client = VoiceClient(self.client, server_id)
-    
-    @chain
-    def build_crocky_talky(self):
-        voice_channel_id = self.secrets['server']['voice_channel_id']
-        self.crocky_talky = CrockyTalky(self.voice_client, voice_channel_id)
-
-    def run_forever(self):
-        bot_thread = gevent.spawn(self.bot.run_forever).join()
-        # crocky_talky_thread = gevent.spawn(self.crocky_talky.run_forever)
-        # gevent.joinall([bot_thread, crocky_talky_thread])
-        # gevent.joinall([crocky_talky_thread])
-
-
-class CrockyTalky:
-    def __init__(self, voice_client, voice_channel_id):
-        self.voice_client = voice_client
-        self.client = voice_client.client
-        self.voice_channel_id = voice_channel_id
-        self.speaking = False
-
-    def run_forever(self):
-        logger.info('CrockyTalky running')
-        self.client.gw.events.on('SnapSnap', self.on_snap_snap)
-        self.client.gw.events.on('VoiceSpeaking', self.on_voice_speaking)
-        while True:
-            if self.voice_client.state == VoiceState.CONNECTED:
-                logger.info('Connected')
-            else:
-                logger.info('Not connected')
-            gevent.sleep(1)
-
-    def on_snap_snap(self):
-        logger.info(f'Snap snap')
-        if self.voice_client.state != VoiceState.CONNECTED:
-            self.voice_client.connect(self.voice_channel_id)
-            return
-
-        self.speaking = not self.speaking
-        self.voice_client.set_speaking(voice=self.speaking)
-
-    def on_voice_speaking(self, event):
-        logger.info(f'Speaking: {event}')
-        # self.voice_client.connect(self.voice_channel_id)

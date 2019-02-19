@@ -1,4 +1,5 @@
 import logging
+import inspect
 from functools import wraps
 
 def get_logger(name, fmt=None, level=None):
@@ -36,12 +37,38 @@ def memoize(f):
     return wrapper
 
 def chain(instance_method):
+    '''
+    Wraps a method by discarding its return value and returning its first
+    argument instead. The function must accept a least one positional argument,
+    or an argument error 
+
+    Using this on a class instance method allows chaining
+    calls on the same receiver, for example
+
+        class Foo:
+            @chain
+            def bar(self):
+                print('Bar!')
+                return 'Unused!'
+
+            @chain
+            def baz(self):
+                print('Baz!')
+                return 'Wasted!'
+
+        Foo().bar().baz()
+        > 'Bar!'
+        > 'Baz!'
+    '''
+    method_signature = inspect.signature(instance_method)
+    if len(method_signature.parameters) < 1:
+        raise TypeError(
+            'Chainable methods must accept at least one positional argument.'
+        )
+
     @wraps(instance_method)
-    def wrapper(*args, **kwargs):
-        # assert hasattr(instance_method, '__self__'), (
-        #     f'Non-instance method "{instance_method.__name__}" cannot be chained.'
-        # )
-        instance_method(*args, **kwargs)
-        return args[0]
+    def wrapper(self, *args, **kwargs):
+        instance_method(self, *args, **kwargs)
+        return self
 
     return wrapper

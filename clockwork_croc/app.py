@@ -22,5 +22,13 @@ def main():
 
     booter.boot()    
 
+'''
+# Idea
+
+def alt_main():
+    disco_app = with DiscoBuilder() as db:
+        db.config
+'''
+
 if __name__ == '__main__':
     main()
